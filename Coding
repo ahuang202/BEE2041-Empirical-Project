@@ -14,3 +14,30 @@ import seaborn as sns
 Importing Dataset used
 ```{python}
 df = pd.read_csv('pokemon_data.csv')
+```
+
+```{python}
+list(df)
+```
+
+Cleaning Dataset used 
+```{python}
+df_c = pd.DataFrame(
+    # Removing duplicate rows
+    df.drop_duplicates()
+    # removing empty rows 
+    .dropna(how='all')
+    # Removing specific columns 
+    .drop(columns=[])
+    .reset_index(drop=True)
+)
+# Renaming column titles: replacing _ with spaces and capitalising each word
+df_c.columns = df_c.columns.str.replace('_', ' ').str.title()
+# Capitalising 'Id' column title, saving changes
+df_c.rename(columns={'Id':'ID'}, inplace=True)
+```
+
+
+```{python}
+df_c
+```
