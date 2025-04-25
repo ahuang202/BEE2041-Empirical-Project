@@ -18,8 +18,6 @@ df = pd.read_csv('pokemon_data.csv')
 
 Cleaning Dataset used 
 ```{python}
-print(df_c.columns)
-
 df_c = pd.DataFrame(
     # Removing duplicate rows
     df.drop_duplicates()
@@ -33,49 +31,65 @@ df_c = pd.DataFrame(
 # Renaming column titles: replacing _ with spaces and capitalising each word
 df_c.columns = df_c.columns.str.replace('_', ' ').str.title()
 # Capitalising 'Id' and 'Hp' column title, saving changes
-df_c.rename(columns={'Id':'ID', 'Hp':'HP'}, inplace=True)
-
-df_c
+df_c.rename(columns={'Id':'ID', 'Hp':'HP', 'Sp. Attack': 'Special Attack', 'Sp. Defense':'Special Defense'}, inplace=True)
 ```
 
-## Creating Spider plot based on pokemon type on HP, Attack, Special Attack, Defense, Special Defense, Speed on average across pokemopn types. ## 
+## Creating parallel bar plot comparing HP, Attack, Special Attack, Defense, Special Defense, Speed on average across pokemon types. ## 
 ```{python}
 # Creating new dataframe using only columns needed 
-df_stats = df_c[['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats', 'Type 1']]
+df_stats = df_c[['HP', 'Attack', 'Special Attack', 'Defense', 'Special Defense', 'Speed', 'Base Stats', 'Type 1']]
 
-# Printing unique types of pokemon
-print('Types of pokemon:', df_stats['Type 1'].unique())
-```
-```{python}
-# Creating new dataframe for each type of pokemon
-grass_pokemon= df_stats[df_stats['Type 1'] == 'Grass'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
-fire_pokemon= df_stats[df_stats['Type 1'] == 'Fire'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
-water_pokemon= df_stats[df_stats['Type 1'] == 'Water'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
-bug_pokemon= df_stats[df_stats['Type 1'] == 'Bug'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
-normal_pokemon= df_stats[df_stats['Type 1'] == 'Normal'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-poison_pokemon= df_stats[df_stats['Type 1'] == 'Poison'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-electric_pokemon= df_stats[df_stats['Type 1'] == 'Electric'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-ground_pokemon= df_stats[df_stats['Type 1'] == 'Ground'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-fairy_pokemon= df_stats[df_stats['Type 1'] == 'Fairy'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-fighting_pokemon= df_stats[df_stats['Type 1'] == 'Fighting'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-pyschic_pokemon= df_stats[df_stats['Type 1'] == 'Psychic'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-rock_pokemon= df_stats[df_stats['Type 1'] == 'Rock'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-ghost_pokemon= df_stats[df_stats['Type 1'] == 'Ghost'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-ice_pokemon= df_stats[df_stats['Type 1'] == 'Ice'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-dragon_pokemon= df_stats[df_stats['Type 1'] == 'Dragon'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-dark_pokemon= df_stats[df_stats['Type 1'] == 'Dark'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-steel_pokemon= df_stats[df_stats['Type 1'] == 'Steek'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
-flying_pokemon= df_stats[df_stats['Type 1'] == 'Flying'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+type_order = df_stats['Type 1'].unique()
+
+# Group by 'Type 1' and calculate mean of all stats
+plot_df_stats = df_stats.groupby('Type 1').mean(numeric_only=True).reset_index()
+
+# Order by custom type order
+plot_df_ordered = plot_df_stats.set_index('Type 1').loc[type_order].reset_index()
+
+overall_averages = plot_df_stats[all_stats].mean()
+
 ```
 
 ```{python}
-# importing from matplotlib to create spider plot
-from matplotlib.patches import Circle, RegularPolygon
-from matplotlib.path import Path
-from matplotlib.projections import register_projection
-from matplotlib.projections.polar import PolarAxes
-from matplotlib.spines import Spine
-from matplotlib.transforms import Affine2D
+# Plotting parallel bar chart to compare stats across types of pokemon
+# Stats setup
+all_stats = ['HP', 'Attack', 'Special Attack', 'Speed', 'Defense', 'Special Defense']
+
+impact_font = {'fontname':'Impact'}
+verdana_font = {'fontname': 'Verdana'}
+
+# Figure setup
+fig = plt.figure(figsize=(18, 16))
+fig.suptitle('Pokemon Stats by Type', **impact_font, size=25, y=0.76)
+
+# Plotting graphs for individual stats
+for i, stat in enumerate(all_stats):  # all_stats is the list of stats to plot
+    row = 1 + i // 3
+    col = i % 3
+    ax = plt.subplot2grid((4, 3), (row, col))
+    
+    values = plot_df_ordered.set_index('Type 1')[stat]
+    
+    ax.barh(type_order, values, color='#FAAA6D')
+    ax.set_title(f'{stat}', fontsize=15, **verdana_font)
+    ax.invert_yaxis()
+    ax.grid(axis='x', linestyle='--', alpha=0.6)
+    ax.axvline(overall_averages[stat], color='#419EAE', linestyle='--', linewidth=1.5)
+
+    # For the first column in each row, show y-ticks with the Pokémon types
+    if col == 0:  # First column of the row
+        ax.set_yticks(range(len(type_order)))
+        ax.set_yticklabels(type_order, fontsize=11, **verdana_font)
+    
+    # For other columns, hide the y-ticks
+    else: 
+        ax.set_yticks([])
+
+plt.tight_layout()
+plt.show()
+
+
 ```
 
 Spider plots of average of each generation of pokemon (1-9)
