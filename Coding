@@ -16,12 +16,10 @@ Importing Dataset used
 df = pd.read_csv('pokemon_data.csv')
 ```
 
-```{python}
-list(df)
-```
-
 Cleaning Dataset used 
 ```{python}
+print(df_c.columns)
+
 df_c = pd.DataFrame(
     # Removing duplicate rows
     df.drop_duplicates()
@@ -31,13 +29,55 @@ df_c = pd.DataFrame(
     .drop(columns=[])
     .reset_index(drop=True)
 )
+
 # Renaming column titles: replacing _ with spaces and capitalising each word
 df_c.columns = df_c.columns.str.replace('_', ' ').str.title()
-# Capitalising 'Id' column title, saving changes
-df_c.rename(columns={'Id':'ID'}, inplace=True)
-```
+# Capitalising 'Id' and 'Hp' column title, saving changes
+df_c.rename(columns={'Id':'ID', 'Hp':'HP'}, inplace=True)
 
-
-```{python}
 df_c
 ```
+
+## Creating Spider plot based on pokemon type on HP, Attack, Special Attack, Defense, Special Defense, Speed on average across pokemopn types. ## 
+```{python}
+# Creating new dataframe using only columns needed 
+df_stats = df_c[['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats', 'Type 1']]
+
+# Printing unique types of pokemon
+print('Types of pokemon:', df_stats['Type 1'].unique())
+```
+```{python}
+# Creating new dataframe for each type of pokemon
+grass_pokemon= df_stats[df_stats['Type 1'] == 'Grass'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+fire_pokemon= df_stats[df_stats['Type 1'] == 'Fire'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+water_pokemon= df_stats[df_stats['Type 1'] == 'Water'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+bug_pokemon= df_stats[df_stats['Type 1'] == 'Bug'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+normal_pokemon= df_stats[df_stats['Type 1'] == 'Normal'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+poison_pokemon= df_stats[df_stats['Type 1'] == 'Poison'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+electric_pokemon= df_stats[df_stats['Type 1'] == 'Electric'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+ground_pokemon= df_stats[df_stats['Type 1'] == 'Ground'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+fairy_pokemon= df_stats[df_stats['Type 1'] == 'Fairy'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+fighting_pokemon= df_stats[df_stats['Type 1'] == 'Fighting'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+pyschic_pokemon= df_stats[df_stats['Type 1'] == 'Psychic'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+rock_pokemon= df_stats[df_stats['Type 1'] == 'Rock'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+ghost_pokemon= df_stats[df_stats['Type 1'] == 'Ghost'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+ice_pokemon= df_stats[df_stats['Type 1'] == 'Ice'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+dragon_pokemon= df_stats[df_stats['Type 1'] == 'Dragon'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+dark_pokemon= df_stats[df_stats['Type 1'] == 'Dark'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+steel_pokemon= df_stats[df_stats['Type 1'] == 'Steek'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T 
+flying_pokemon= df_stats[df_stats['Type 1'] == 'Flying'][['HP', 'Attack', 'Sp. Attack', 'Defense', 'Sp. Defense', 'Speed', 'Base Stats']].mean().to_frame().T
+```
+
+```{python}
+# importing from matplotlib to create spider plot
+from matplotlib.patches import Circle, RegularPolygon
+from matplotlib.path import Path
+from matplotlib.projections import register_projection
+from matplotlib.projections.polar import PolarAxes
+from matplotlib.spines import Spine
+from matplotlib.transforms import Affine2D
+```
+
+Spider plots of average of each generation of pokemon (1-9)
+
+how stat types change through the generations (do they get stronger?)
