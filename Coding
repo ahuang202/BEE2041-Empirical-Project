@@ -53,24 +53,37 @@ overall_averages = plot_df_stats[all_stats].mean()
 
 ```{python}
 # Plotting parallel bar chart to compare stats across types of pokemon
+
+# importing Line2D to create line for legend
+from matplotlib.lines import Line2D
+
 # Stats setup
 all_stats = ['HP', 'Attack', 'Special Attack', 'Speed', 'Defense', 'Special Defense']
 
 impact_font = {'fontname':'Impact'}
 verdana_font = {'fontname': 'Verdana'}
 
-# Figure setup
+# Plot figure
 fig = plt.figure(figsize=(18, 16))
-fig.suptitle('Pokemon Stats by Type', **impact_font, size=25, y=0.76)
+# Adding title: chnaging font, size, and position
+fig.suptitle('Pokémon Stats by Type', **impact_font, size=25, y=0.76)
+
+# Create custom line for the legend
+avg_line = Line2D([0], [0], color='#419EAE', linestyle='--', linewidth=1.5, label='Average')
+
+# Add legend to plot
+fig.legend(handles=[avg_line], loc='upper right', fontsize=10, bbox_to_anchor=(0.11, 0.75), frameon=False)
 
 # Plotting graphs for individual stats
-for i, stat in enumerate(all_stats):  # all_stats is the list of stats to plot
+# Creating loop to plot all charts
+for i, stat in enumerate(all_stats):
     row = 1 + i // 3
     col = i % 3
     ax = plt.subplot2grid((4, 3), (row, col))
     
     values = plot_df_ordered.set_index('Type 1')[stat]
     
+    # Customise charts
     ax.barh(type_order, values, color='#FAAA6D')
     ax.set_title(f'{stat}', fontsize=15, **verdana_font)
     ax.invert_yaxis()
@@ -78,14 +91,15 @@ for i, stat in enumerate(all_stats):  # all_stats is the list of stats to plot
     ax.axvline(overall_averages[stat], color='#419EAE', linestyle='--', linewidth=1.5)
 
     # For the first column in each row, show y-ticks with the Pokémon types
-    if col == 0:  # First column of the row
+    if col == 0:
         ax.set_yticks(range(len(type_order)))
         ax.set_yticklabels(type_order, fontsize=11, **verdana_font)
     
-    # For other columns, hide the y-ticks
+    # For other columns, hide the y-ticks (type)
     else: 
         ax.set_yticks([])
 
+# Printing plot
 plt.tight_layout()
 plt.show()
 
