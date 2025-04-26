@@ -106,6 +106,142 @@ plt.show()
 
 ```
 
+impact of individual stats on base stats
+```{python}
+# Set up the subplot grid (2 rows x 3 columns)
+fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+# Flatten so we can loop easily
+axes = axes.flatten()
+fig.suptitle('Impact of Individual Stats on Base Stats', **impact_font, size=25, y=0.985)
+
+# Loop through each stat and plot on its own subplot
+for idx, stat in enumerate(all_stats):
+    ax = axes[idx]
+    
+    # Scatter plot
+    ax.scatter(df_c[stat], df_c['Base Stats'], alpha=0.5)
+    
+    # Calculate and add line of best fit
+    m, b = np.polyfit(df_c[stat], df_c['Base Stats'], 1)
+    ax.plot(df_c[stat], m * df_c[stat] + b, color='red')
+    
+    # Customise each subplot
+    ax.set_xlabel(stat, fontsize=11, **verdana_font)
+    ax.set_title(f'Impact of {stat} on Base Stats', fontsize=15, **verdana_font)
+    ax.tick_params(axis='both', which='major', labelsize=9)
+
+    # Calculate R²
+    tss = np.sum((y - np.mean(y))**2)
+    rss = np.sum((y - y_pred)**2)
+    r_squared = 1 - (rss / tss)
+
+    # Add title and R² value inside the plot
+    ax.set_title(f'{stat} vs Base Stats\n$R^2$ = {r_squared:.2f}', fontsize=12)
+    ax.set_xlabel(stat, fontsize=10)
+    ax.tick_params(axis='both', which='major', labelsize=9)
+    
+    # Add slope and intercept as a text inside the plot
+    textstr = f"Slope: {m:.2f}\nIntercept: {b:.2f}"
+    ax.text(0.02, 0.98, textstr, transform=ax.transAxes,
+            fontsize=9, verticalalignment='top', **verdana_font)
+
+# Adjust layout and print
+plt.tight_layout()
+plt.show()
+
+```
+
+modelling captrure rate 
+```{python}
+
+# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
+X = df_c[['Attack','HP', 'Is Legendary', 'Is Mythical', 'Egg Steps', 'Weight Pounds']] 
+y = df_c['Capturing Rate'] # Outcome
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Coefficients
+print(f"Intercept: {model.intercept_}")
+print(f"Attack Coefficient: {model.coef_[0]}")
+print(f"HP Coefficient: {model.coef_[1]}")
+print(f"Legendary Coefficient: {model.coef_[2]}")
+print(f"Egg Steps Coefficient: {model.coef_[3]}")
+print(f"Weight Pounds Coefficient: {model.coef_[4]}")
+print(f"Mythical Coefficient: {model.coef_[5]}")
+
+# R² score
+print(f"R² score: {model.score(X_test, y_test)}")
+
+```
+
+Intercept: 233.8375867625524
+Attack Coefficient: -0.8912525469406004
+HP Coefficient: -0.8549620513421569
+Legendary Coefficient: -23.37949424610949
+Egg Steps Coefficient: -0.00133851543751614
+R² score: 0.2865070515289072
+
+impact of base stats on capture rate
+
+```{python}
+# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
+X2 = df_c[['Base Stats']]   
+y2 = df_c['Capturing Rate']
+
+# Train/test split
+X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2, random_state=67)
+
+# Model
+model = LinearRegression()
+model.fit(X2_train, y2_train)
+
+# Coefficients
+print(f"Intercept: {model.intercept_}")
+print(f"Base Stats Coefficient: {model.coef_[0]}")
+
+# R² score
+print(f"R² score: {model.score(X2_test, y2_test)}")
+```
+
+Intercept: 308.14099756146385
+Base Stats Coefficient: -0.49656118426017953
+R² score: 0.5355791288667282
+
+```{python}
+# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
+X = df_c[['Egg Steps']]   
+y = df_c['Capturing Rate'] 
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Coefficients
+print(f"Intercept: {model.intercept_}")
+print(f"Egg Steps Coefficient: {model.coef_[0]} for every step, {model.coef_[0]*1000} for every 1000 steps required to hatch the egg")
+
+# R² score
+print(f"R² score: {model.score(X_test, y_test)}")
+
+```
+
+
+
+
 Spider plots of average of each generation of pokemon (1-9)
 
 how stat types change through the generations (do they get stronger?)
+
+predict legendary and mythical status based on stats 
+
+```{python}
+df_c['Base Stats'].mean()
+```
