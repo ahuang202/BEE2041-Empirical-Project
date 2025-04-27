@@ -173,11 +173,17 @@ plt.show()
 
 ```
 
+```{python}
+summary_stats = df_c[all_stats_base].describe().round()
+summary_stats
+```
+
 ## Pie Chart: comapring base stats composition by type 1 ##
 importing libraries to make interactive pie chart
 ```{python}
 import plotly.graph_objects as graph_objects
 from plotly.subplots import make_subplots
+import plotly.express as px
 ```
 
 ```{python}
@@ -190,6 +196,7 @@ pie_chart_colours = [
     '#FCC499',  # Defense (ligh orange)
     '#FAAA6D'   # Special Defense (dark orange)
 ]
+
 # Number of rows and columns in the subplot grid
 n_types = len(type_df_mean_dict)
 # Adjusting to 3 columns
@@ -248,10 +255,12 @@ fig.update_layout(
     )
 )
 
+
 # Show the plot
 fig.show()
 
 ```
+
 
 ## Impact of individual stats on base stats
 ```{python}
@@ -304,6 +313,88 @@ plt.show()
 
 ```
 
+```{python}
+import plotly.graph_objects as go  # Correct import for graph_objects
+import chart_studio.plotly as py
+import chart_studio.tools as tls
+from plotly.subplots import make_subplots
+import plotly.io as pio
+
+# Custom pie chart colors
+pie_chart_colours = [
+    '#E64556',  # HP (dark pink)
+    '#A2D7D5',  # Attack (light teal)
+    '#55A3AB',  # Special Attack (dark teal)
+    '#7D78A3',  # Speed (purple)
+    '#FCC499',  # Defense (light orange)
+    '#FAAA6D'   # Special Defense (dark orange)
+]
+
+# Number of rows and columns in the subplot grid
+n_types = len(type_df_mean_dict)
+n_cols = 3  # Adjusting to 3 columns
+n_rows = 6  # Since there are 18 types, 18/3 = 6 rows
+
+# Create subplot grid using Plotly
+fig = make_subplots(
+    rows=n_rows, cols=n_cols,
+    subplot_titles=[type_name.replace("df_type_", "").replace("_mean", "") for type_name in type_df_mean_dict.keys()],
+    specs=[[{'type': 'pie'}] * n_cols for _ in range(n_rows)]
+)
+
+# Loop through each DataFrame in type_df_mean_dict and create a pie chart in each subplot
+for i, (type_name, type_df) in enumerate(type_df_mean_dict.items()):
+    # Extract the different stats
+    stats = type_df[all_stats].values.flatten()
+
+    # Create labels for the stats
+    labels = all_stats
+
+    # Calculate row and column for each pie chart
+    row = i // n_cols + 1
+    col = i % n_cols + 1
+
+    # Create the pie chart for the current type
+    pie = go.Pie(
+        labels=labels,
+        values=stats,
+        name=type_name.replace("df_type_", "").replace("_mean", ""),
+        hole=0.3,
+        marker=dict(colors=pie_chart_colours)
+    )
+
+    # Add the pie chart to the appropriate subplot
+    fig.add_trace(pie, row=row, col=col)
+
+# Update the layout
+fig.update_layout(
+    title_text="Base Stats Composition by Pokémon Type",
+    title_font=dict(
+        family='Impact',
+        color='#042C3B',  # Navy color
+        size=28
+    ),
+    height=2000,
+    width=1000,
+    title_x=0.5,  # Center the title
+    legend=dict(
+        x=-0.08,
+        y=1.05,
+        bgcolor='rgba(0,0,0,0)'  # Transparent legend background
+    )
+)
+
+# Upload to Plotly
+fig.write_html('base_stats_comp_pie_chart.html')
+pio.show(fig) 
+
+# Show the plot
+fig.show()
+
+
+```
+
+
 ## Modelling what determines capture rate ##
 ```{python}
 from sklearn.model_selection import train_test_split
@@ -335,6 +426,8 @@ print(f"Total Weakness Coefficient: {model.coef_[5]}")
 
 # R² score
 print(f"R² score: {model.score(X_test, y_test)}")
+```
+
 ```
 
 Random Forest Regression to determine the causes
