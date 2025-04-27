@@ -151,14 +151,14 @@ plt.show()
 
 ```
 
-modelling captrure rate 
+modelling capture rate 
 ```{python}
 
 # Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X = df_c[['Attack','HP', 'Is Legendary', 'Is Mythical', 'Egg Steps', 'Weight Pounds']] 
-y = df_c['Capturing Rate'] # Outcome
+X = df_c[['Base Stats', 'Is Legendary', 'Egg Cycles', 'Number Normal', 'Number Super Effective']] 
+y = df_c['Capturing Rate']
 
-# Train/test split
+# Train/test split, random state set to 42 (ensures fixed data set and reproducability)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Model
@@ -167,12 +167,11 @@ model.fit(X_train, y_train)
 
 # Coefficients
 print(f"Intercept: {model.intercept_}")
-print(f"Attack Coefficient: {model.coef_[0]}")
-print(f"HP Coefficient: {model.coef_[1]}")
-print(f"Legendary Coefficient: {model.coef_[2]}")
-print(f"Egg Steps Coefficient: {model.coef_[3]}")
-print(f"Weight Pounds Coefficient: {model.coef_[4]}")
-print(f"Mythical Coefficient: {model.coef_[5]}")
+print(f"Base Stats Coefficient: {model.coef_[0]}")
+print(f"Legendary Coefficient: {model.coef_[1]}")
+print(f"Egg Cycles Coefficient: {model.coef_[2]}")
+print(f"Number Normal: {model.coef_[3]}")
+print(f"Number Super Effective: {model.coef_[4]}")
 
 # R² score
 print(f"R² score: {model.score(X_test, y_test)}")
@@ -194,7 +193,7 @@ X2 = df_c[['Base Stats']]
 y2 = df_c['Capturing Rate']
 
 # Train/test split
-X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2, random_state=67)
+X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2, random_state=42)
 
 # Model
 model = LinearRegression()
@@ -208,14 +207,14 @@ print(f"Base Stats Coefficient: {model.coef_[0]}")
 print(f"R² score: {model.score(X2_test, y2_test)}")
 ```
 
-Intercept: 308.14099756146385
-Base Stats Coefficient: -0.49656118426017953
-R² score: 0.5355791288667282
+Intercept: 313.1090355486016
+Base Stats Coefficient: -0.5109640001311458
+R² score: 0.44456748480008246
 
 ```{python}
 # Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X = df_c[['Egg Steps']]   
-y = df_c['Capturing Rate'] 
+X = df_c[['Egg Cycles', 'Is Legendary']]   
+y = df_c['Base Stats'] 
 
 # Train/test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -233,6 +232,32 @@ print(f"R² score: {model.score(X_test, y_test)}")
 
 ```
 
+Intercept: 122.53966361352428
+Egg Steps Coefficient: -0.004077861607185263 for every step, -4.077861607185263 for every 1000 steps required to hatch the egg
+R² score: 0.10790633898266933
+
+```{python}
+# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
+X = df_c[['Number Immune', 'Number Not Effective', 'Number Normal', 'Number Super Effective']]   
+y = df_c['Base Stats'] 
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Coefficients
+print(f"Intercept: {model.intercept_}")
+print(f"Number Immune Coefficient: {model.coef_[0]}")
+print(f"Number Not Effective Coefficient: {model.coef_[1]}")
+print(f"Number Normal Coefficient: {model.coef_[2]}")
+print(f"Number Super Effective Coefficient: {model.coef_[3]}")
+
+# R² score
+print(f"R² score: {model.score(X_test, y_test)}")
+```
 
 
 
