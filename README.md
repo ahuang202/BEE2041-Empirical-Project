@@ -12,7 +12,7 @@ This repository is structured as follows:
 ├── README
 ├── pokemon_data.csv
 └── results
-    ├── figures
-    └── tables
+        ├── figures
+        └── tables
 
 ## Running instructions
