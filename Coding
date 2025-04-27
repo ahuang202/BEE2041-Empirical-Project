@@ -32,7 +32,71 @@ df_c = pd.DataFrame(
 df_c.columns = df_c.columns.str.replace('_', ' ').str.title()
 # Capitalising 'Id' and 'Hp' column title, saving changes
 df_c.rename(columns={'Id':'ID', 'Hp':'HP', 'Sp. Attack': 'Special Attack', 'Sp. Defense':'Special Defense'}, inplace=True)
+
+# Adding Total Weakness Column
+list_weaknesses = ['Normal Weakness', 'Fire Weakness', 'Water Weakness', 'Electric Weakness', 
+    'Grass Weakness', 'Ice Weakness', 'Fighting Weakness',  'Poison Weakness',
+    'Ground Weakness', 'Flying Weakness', 'Psychic Weakness', 'Bug Weakness',
+    'Rock Weakness',   'Ghost Weakness', 'Dragon Weakness', 'Dark Weakness',
+    'Steel Weakness', 'Fairy Weakness']
+
+df_c['Total Weakness'] = df_c[list_weaknesses].sum(axis=1)
 ```
+
+Sorting df in to new dfs by type 1 and storing in a dictionary
+```{python}
+# Making dictionary to store dfs
+type_df_dict = {}
+
+# Go through each unique value in the Type 1 column
+for type_value in df_c['Type 1'].unique():
+    # Filter the DataFrame for the rows same as current type 
+    type_df = df_c[df_c['Type 1'] == type_value]
+    
+    # Store the DataFrame in a dictionary with the type as the key
+    type_df_dict[f"df_type_{type_value}"] = type_df
+
+
+type_df_names = list(type_df_dict.keys())
+print(type_df_names)
+```
+
+Output: ['df_type_Grass', 'df_type_Fire', 'df_type_Water', 'df_type_Bug', 
+        'df_type_Normal', 'df_type_Poison', 'df_type_Electric', 
+        'df_type_Ground', 'df_type_Fairy', 'df_type_Fighting', 
+        'df_type_Psychic', 'df_type_Rock', 'df_type_Ghost', 'df_type_Ice',
+        'df_type_Dragon', 'df_type_Dark', 'df_type_Steel', 'df_type_Flying']
+
+Sorting df in to new dfs by type 1 and mean of base stats and storing in a dictionary
+```{python}
+all_stats_base = ['Base Stats', 'HP', 'Attack', 'Special Attack', 'Speed', 'Defense', 'Special Defense']
+
+type_df_mean_dict = {}
+
+# Go through each unique value in the Type 1 column
+for type_value in df_c['Type 1'].unique():
+    # Filter the DataFrame for the rows same as current type 
+    type_df = df_c[df_c['Type 1'] == type_value]
+
+    mean_values = type_df[all_stats_base].mean()
+    
+    # Create a new dataframe with the mean values
+    mean_df = pd.DataFrame(mean_values).transpose()  # Convert the Series to a DataFrame
+    mean_df['Type 1'] = type_value  # Add the type as a column
+    
+    # Store the new mean dataframe in the dictionary
+    type_df_mean_dict[f"df_type_{type_value}_mean"] = mean_df
+
+type_df_mean_names = list(type_df_mean_dict.keys())
+print(type_df_mean_names)
+```
+
+Output: ['df_type_Grass_mean', 'df_type_Fire_mean', 'df_type_Water_mean', 
+        'df_type_Bug_mean', 'df_type_Normal_mean', 'df_type_Poison_mean',
+        'df_type_Electric_mean', 'df_type_Ground_mean', 'df_type_Fairy_mean', 
+        'df_type_Fighting_mean', 'df_type_Psychic_mean', 'df_type_Rock_mean', 
+        'df_type_Ghost_mean', 'df_type_Ice_mean', 'df_type_Dragon_mean', 
+        'df_type_Dark_mean', 'df_type_Steel_mean', 'df_type_Flying_mean']
 
 ## Creating parallel bar plot comparing HP, Attack, Special Attack, Defense, Special Defense, Speed on average across pokemon types. ## 
 ```{python}
@@ -47,19 +111,21 @@ plot_df_stats = df_stats.groupby('Type 1').mean(numeric_only=True).reset_index()
 # Order by custom type order
 plot_df_ordered = plot_df_stats.set_index('Type 1').loc[type_order].reset_index()
 
+# Stats setup
+all_stats = ['HP', 'Attack', 'Special Attack', 'Speed', 'Defense', 'Special Defense']
+
 overall_averages = plot_df_stats[all_stats].mean()
 
 ```
 
+## CHART: Comparing Base Stat Distribution among Pokémon Type## 
 ```{python}
 # Plotting parallel bar chart to compare stats across types of pokemon
 
 # importing Line2D to create line for legend
 from matplotlib.lines import Line2D
 
-# Stats setup
-all_stats = ['HP', 'Attack', 'Special Attack', 'Speed', 'Defense', 'Special Defense']
-
+# setting custom fonts
 impact_font = {'fontname':'Impact'}
 verdana_font = {'fontname': 'Verdana'}
 
@@ -106,7 +172,7 @@ plt.show()
 
 ```
 
-impact of individual stats on base stats
+## Impact of individual stats on base stats
 ```{python}
 # Set up the subplot grid (2 rows x 3 columns)
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
@@ -130,20 +196,26 @@ for idx, stat in enumerate(all_stats):
     ax.set_title(f'Impact of {stat} on Base Stats', fontsize=15, **verdana_font)
     ax.tick_params(axis='both', which='major', labelsize=9)
 
+    y= df_c['Base Stats']
+    y_pred= m * df_c[stat] + b
+
     # Calculate R²
     tss = np.sum((y - np.mean(y))**2)
     rss = np.sum((y - y_pred)**2)
     r_squared = 1 - (rss / tss)
 
     # Add title and R² value inside the plot
-    ax.set_title(f'{stat} vs Base Stats\n$R^2$ = {r_squared:.2f}', fontsize=12)
+    ax.set_title(f'{stat} vs Base Stats', fontsize=12)
     ax.set_xlabel(stat, fontsize=10)
     ax.tick_params(axis='both', which='major', labelsize=9)
     
     # Add slope and intercept as a text inside the plot
-    textstr = f"Slope: {m:.2f}\nIntercept: {b:.2f}"
+    textstr = f"Slope: {m:.2f}\nIntercept: {b:.2f}\nR²: {r_squared:.2f}"
     ax.text(0.02, 0.98, textstr, transform=ax.transAxes,
             fontsize=9, verticalalignment='top', **verdana_font)
+
+    if idx % 3 == 0: 
+        ax.set_ylabel('Base Stats', fontsize=11, **verdana_font)
 
 # Adjust layout and print
 plt.tight_layout()
@@ -151,11 +223,17 @@ plt.show()
 
 ```
 
-modelling capture rate 
+## Modelling what determines capture rate ##
 ```{python}
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score
 
+```
+```{python}
 # Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X = df_c[['Base Stats', 'Is Legendary', 'Egg Cycles', 'Number Normal', 'Number Super Effective']] 
+X = df_c[['Base Stats', 'Is Legendary', 'Egg Cycles', 'Number Normal', 'Number Super Effective', 'Total Weakness']] 
 y = df_c['Capturing Rate']
 
 # Train/test split, random state set to 42 (ensures fixed data set and reproducability)
@@ -170,103 +248,38 @@ print(f"Intercept: {model.intercept_}")
 print(f"Base Stats Coefficient: {model.coef_[0]}")
 print(f"Legendary Coefficient: {model.coef_[1]}")
 print(f"Egg Cycles Coefficient: {model.coef_[2]}")
-print(f"Number Normal: {model.coef_[3]}")
-print(f"Number Super Effective: {model.coef_[4]}")
+print(f"Number Normal Coefficient: {model.coef_[3]}")
+print(f"Number Super Effective Coefficient: {model.coef_[4]}")
+print(f"Total Weakness Coefficient: {model.coef_[5]}")
 
 # R² score
 print(f"R² score: {model.score(X_test, y_test)}")
-
 ```
 
-Intercept: 233.8375867625524
-Attack Coefficient: -0.8912525469406004
-HP Coefficient: -0.8549620513421569
-Legendary Coefficient: -23.37949424610949
-Egg Steps Coefficient: -0.00133851543751614
-R² score: 0.2865070515289072
-
-impact of base stats on capture rate
-
+Random Forest Regression to determine the causes
 ```{python}
-# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X2 = df_c[['Base Stats']]   
-y2 = df_c['Capturing Rate']
+# 1. Define X and y
+X = df_c[['Base Stats', 'Egg Cycles']]
+y = df_c['Capturing Rate']
 
-# Train/test split
-X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2, random_state=42)
-
-# Model
-model = LinearRegression()
-model.fit(X2_train, y2_train)
-
-# Coefficients
-print(f"Intercept: {model.intercept_}")
-print(f"Base Stats Coefficient: {model.coef_[0]}")
-
-# R² score
-print(f"R² score: {model.score(X2_test, y2_test)}")
-```
-
-Intercept: 313.1090355486016
-Base Stats Coefficient: -0.5109640001311458
-R² score: 0.44456748480008246
-
-```{python}
-# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X = df_c[['Egg Cycles', 'Is Legendary']]   
-y = df_c['Base Stats'] 
-
-# Train/test split
+# 2. Train/test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Model
-model = LinearRegression()
+# 3. Random Forest Model
+model = RandomForestRegressor(n_estimators=200, random_state=67)  # 100 trees in the forest
+
+# 4. Fit the model
 model.fit(X_train, y_train)
 
-# Coefficients
-print(f"Intercept: {model.intercept_}")
-print(f"Egg Steps Coefficient: {model.coef_[0]} for every step, {model.coef_[0]*1000} for every 1000 steps required to hatch the egg")
+# 5. Predictions and score
+y_pred = model.predict(X_test)
 
-# R² score
-print(f"R² score: {model.score(X_test, y_test)}")
-
+# 6. Evaluate
+print(f"R² Score: {r2_score(y_test, y_pred)}")
 ```
-
-Intercept: 122.53966361352428
-Egg Steps Coefficient: -0.004077861607185263 for every step, -4.077861607185263 for every 1000 steps required to hatch the egg
-R² score: 0.10790633898266933
-
-```{python}
-# Define X (what is influeincing y) and y (the outcome/what is impacted by X)
-X = df_c[['Number Immune', 'Number Not Effective', 'Number Normal', 'Number Super Effective']]   
-y = df_c['Base Stats'] 
-
-# Train/test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-# Coefficients
-print(f"Intercept: {model.intercept_}")
-print(f"Number Immune Coefficient: {model.coef_[0]}")
-print(f"Number Not Effective Coefficient: {model.coef_[1]}")
-print(f"Number Normal Coefficient: {model.coef_[2]}")
-print(f"Number Super Effective Coefficient: {model.coef_[3]}")
-
-# R² score
-print(f"R² score: {model.score(X_test, y_test)}")
-```
-
-
 
 Spider plots of average of each generation of pokemon (1-9)
 
 how stat types change through the generations (do they get stronger?)
 
 predict legendary and mythical status based on stats 
-
-```{python}
-df_c['Base Stats'].mean()
-```
