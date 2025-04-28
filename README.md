@@ -6,8 +6,8 @@ Date: 2025-04-28
 
 ## Repository overview
 This repository is structured as follows:  
-├── Blog.txt 
-├── Coding 
+├── Blog.txt   
+├── Coding   
 ├── Coding_ouput.pdf  
 ├── Coding.qmd  
 ├── pokemon_data.csv  
