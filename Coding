@@ -433,3 +433,8 @@ plt.ylabel('Average Base Stats', **verdana_font)
 plt.tight_layout()
 plt.show()
 ```
+
+
+```{python}
+pip freeze > requirements.txt
+```
