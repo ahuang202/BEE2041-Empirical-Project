@@ -11,9 +11,9 @@ This repository is structured as follows:
 ├── Coding_ouput.pdf  
 ├── Coding.qmd  
 ├── pokemon_data.csv  
-└── results  
-        ├── figures    
-        └── tables   
+└── results    
+        ├── figures      
+        └── tables     
 └── README 
 
 All libraries and versions used are in requirements.txt file in depository/submission folder to replicate results.
