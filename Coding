@@ -187,7 +187,7 @@ import plotly.express as px
 ```
 
 ```{python}
-#custominist pie chart colours
+# customise pie chart colours
 pie_chart_colours = [
     '#E64556',  # HP (dark pink)
     '#A2D7D5',  # Attack (light teal)
@@ -313,94 +313,13 @@ plt.show()
 
 ```
 
-```{python}
-import plotly.graph_objects as go  # Correct import for graph_objects
-import chart_studio.plotly as py
-import chart_studio.tools as tls
-from plotly.subplots import make_subplots
-import plotly.io as pio
-
-# Custom pie chart colors
-pie_chart_colours = [
-    '#E64556',  # HP (dark pink)
-    '#A2D7D5',  # Attack (light teal)
-    '#55A3AB',  # Special Attack (dark teal)
-    '#7D78A3',  # Speed (purple)
-    '#FCC499',  # Defense (light orange)
-    '#FAAA6D'   # Special Defense (dark orange)
-]
-
-# Number of rows and columns in the subplot grid
-n_types = len(type_df_mean_dict)
-n_cols = 3  # Adjusting to 3 columns
-n_rows = 6  # Since there are 18 types, 18/3 = 6 rows
-
-# Create subplot grid using Plotly
-fig = make_subplots(
-    rows=n_rows, cols=n_cols,
-    subplot_titles=[type_name.replace("df_type_", "").replace("_mean", "") for type_name in type_df_mean_dict.keys()],
-    specs=[[{'type': 'pie'}] * n_cols for _ in range(n_rows)]
-)
-
-# Loop through each DataFrame in type_df_mean_dict and create a pie chart in each subplot
-for i, (type_name, type_df) in enumerate(type_df_mean_dict.items()):
-    # Extract the different stats
-    stats = type_df[all_stats].values.flatten()
-
-    # Create labels for the stats
-    labels = all_stats
-
-    # Calculate row and column for each pie chart
-    row = i // n_cols + 1
-    col = i % n_cols + 1
-
-    # Create the pie chart for the current type
-    pie = go.Pie(
-        labels=labels,
-        values=stats,
-        name=type_name.replace("df_type_", "").replace("_mean", ""),
-        hole=0.3,
-        marker=dict(colors=pie_chart_colours)
-    )
-
-    # Add the pie chart to the appropriate subplot
-    fig.add_trace(pie, row=row, col=col)
-
-# Update the layout
-fig.update_layout(
-    title_text="Base Stats Composition by Pokémon Type",
-    title_font=dict(
-        family='Impact',
-        color='#042C3B',  # Navy color
-        size=28
-    ),
-    height=2000,
-    width=1000,
-    title_x=0.5,  # Center the title
-    legend=dict(
-        x=-0.08,
-        y=1.05,
-        bgcolor='rgba(0,0,0,0)'  # Transparent legend background
-    )
-)
-
-# Upload to Plotly
-fig.write_html('base_stats_comp_pie_chart.html')
-pio.show(fig) 
-
-# Show the plot
-fig.show()
-
-
-```
-
-
 ## Modelling what determines capture rate ##
 ```{python}
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
+from sklearn.tree import DecisionTreeRegressor
 
 ```
 ```{python}
@@ -428,9 +347,7 @@ print(f"Total Weakness Coefficient: {model.coef_[5]}")
 print(f"R² score: {model.score(X_test, y_test)}")
 ```
 
-```
-
-Random Forest Regression to determine the causes
+Random Forest Regression Model to determine the causes
 ```{python}
 # 1. Define X and y
 X = df_c[['Base Stats', 'Egg Cycles']]
@@ -452,8 +369,63 @@ y_pred = model.predict(X_test)
 print(f"R² Score: {r2_score(y_test, y_pred)}")
 ```
 
-Spider plots of average of each generation of pokemon (1-9)
+```{python}
+# 1. Define X and y
+X = df_c[['Base Stats', 'Capturing Rate', ]]
+y = df_c['Is Legendary']
 
-how stat types change through the generations (do they get stronger?)
+# 2. Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-predict legendary and mythical status based on stats 
+# 3. Random Forest Model
+model = RandomForestRegressor(n_estimators=200, random_state=67)  # 100 trees in the forest
+
+# 4. Fit the model
+model.fit(X_train, y_train)
+
+# 5. Predictions and score
+y_pred = model.predict(X_test)
+
+# 6. Evaluate
+print(f"R² Score: {r2_score(y_test, y_pred)}")
+```
+
+
+building causal model:impact of legndary status on base stats
+```{python}
+from causalinference import CausalModel
+```
+
+```{python}
+model = CausalModel(
+    Y=df_c['Base Stats'].values,
+    D=df_c['Is Legendary'].values,
+    X=df_c[['Total Weakness', 'Height Inches','Weight Pounds', 'Capturing Rate',
+    'Egg Cycles', 'Gen'
+    ]].values
+)
+
+model.est_via_ols()
+model.est_via_matching()
+
+# Visualizing the outcomes
+plt.figure(figsize=(12, 6))
+plt.suptitle('Effects of Legendary Status on Total Base Stats', fontsize=20, **impact_font)
+plt.subplot(1, 2, 1)
+plt.hist(df_c[df_c['Is Legendary'] == 0]['Base Stats'], alpha=0.5, label='Control', color='#92D1B3')
+plt.hist(df_c[df_c['Is Legendary'] == 1]['Base Stats'], alpha=0.5, label='Is Legendary', color='#B74555')
+plt.title('Distribution of Outcomes')
+plt.xlabel('Base Stats', **verdana_font)
+plt.ylabel('Frequency', **verdana_font)
+plt.legend(frameon=False)
+
+plt.subplot(1, 2, 2)
+treated_mean = df_c[df_c['Is Legendary'] == 1]['Base Stats'].mean()
+control_mean = df_c[df_c['Is Legendary'] == 0]['Base Stats'].mean()
+plt.bar(['Control', 'Is Legendary'], [control_mean, treated_mean], color=['#92D1B3', '#B74555'])
+plt.title('Average Base Stats by Group', **verdana_font)
+plt.ylabel('Average Base Stats', **verdana_font)
+
+plt.tight_layout()
+plt.show()
+```
