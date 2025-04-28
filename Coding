@@ -131,9 +131,9 @@ impact_font = {'fontname':'Impact'}
 verdana_font = {'fontname': 'Verdana'}
 
 # Plot figure
-fig = plt.figure(figsize=(18, 16))
+fig = plt.figure(figsize=(18, 18))
 # Adding title: chnaging font, size, and position
-fig.suptitle('Pokémon Stats by Type', **impact_font, size=25, y=0.76)
+fig.suptitle('Pokémon Stats by Type', **impact_font, size=30, y=0.76)
 
 # Create custom line for the legend
 avg_line = Line2D([0], [0], color='#419EAE', linestyle='--', linewidth=1.5, label='Average')
@@ -149,9 +149,12 @@ for i, stat in enumerate(all_stats):
     ax = plt.subplot2grid((4, 3), (row, col))
     
     values = plot_df_ordered.set_index('Type 1')[stat]
+
+    colours = ['#FAAA6D', '#F2684A']
+    bar_colours = [colours[i % 2] for i in range(len(values))]
     
     # Customise charts
-    ax.barh(type_order, values, color='#FAAA6D')
+    ax.barh(type_order, values, color=bar_colours)
     ax.set_title(f'{stat}', fontsize=15, **verdana_font)
     ax.invert_yaxis()
     ax.grid(axis='x', linestyle='--', alpha=0.6)
@@ -174,6 +177,7 @@ plt.show()
 ```
 
 ```{python}
+# creating summary stats table and rounding
 summary_stats = df_c[all_stats_base].describe().round()
 summary_stats
 ```
