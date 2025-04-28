@@ -1,0 +1,69 @@
+---
+title: "coding"
+format: pdf
+---
+
+Importing libraries used
+```{python}
+import pandas as pd 
+import numpy as np 
+import matplotlib.pyplot as plt 
+import seaborn as sns
+import plotly
+```
+
+Importing Dataset used
+```{python}
+df = pd.read_csv('pokemon_data.csv')
+```
+
+Cleaning Dataset used 
+```{python}
+df_c = pd.DataFrame(
+    # Removing duplicate rows
+    df.drop_duplicates()
+    # removing empty rows 
+    .dropna(how='all')
+    # Removing specific columns 
+    .drop(columns=[])
+    .reset_index(drop=True)
+)
+
+# Renaming column titles: replacing _ with spaces and capitalising each word
+df_c.columns = df_c.columns.str.replace('_', ' ').str.title()
+# Capitalising 'Id' and 'Hp' column title, saving changes
+df_c.rename(columns={'Id':'ID', 'Hp':'HP', 'Sp. Attack': 'Special Attack', 'Sp. Defense':'Special Defense'}, inplace=True)
+
+# Adding Total Weakness Column
+list_weaknesses = ['Normal Weakness', 'Fire Weakness', 'Water Weakness', 'Electric Weakness', 
+    'Grass Weakness', 'Ice Weakness', 'Fighting Weakness',  'Poison Weakness',
+    'Ground Weakness', 'Flying Weakness', 'Psychic Weakness', 'Bug Weakness',
+    'Rock Weakness',   'Ghost Weakness', 'Dragon Weakness', 'Dark Weakness',
+    'Steel Weakness', 'Fairy Weakness']
+
+df_c['Total Weakness'] = df_c[list_weaknesses].sum(axis=1)
+```
+
+Sorting df in to new dfs by type 1 and storing in a dictionary
+```{python}
+# Making dictionary to store dfs
+type_df_dict = {}
+
+# Go through each unique value in the Type 1 column
+for type_value in df_c['Type 1'].unique():
+    # Filter the DataFrame for the rows same as current type 
+    type_df = df_c[df_c['Type 1'] == type_value]
+    
+    # Store the DataFrame in a dictionary with the type as the key
+    type_df_dict[f"df_type_{type_value}"] = type_df
+
+
+type_df_names = list(type_df_dict.keys())
+print(type_df_names)
+```
+
+Output: ['df_type_Grass', 'df_type_Fire', 'df_type_Water', 'df_type_Bug', 
+        'df_type_Normal', 'df_type_Poison', 'df_type_Electric', 
+        'df_type_Ground', 'df_type_Fairy', 'df_type_Fighting', 
+        'df_type_Psychic', 'df_type_Rock', 'df_type_Ghost', 'df_type_Ice',
+        'df_type_Dragon', 'df_type_Dark', 'df_type_Steel', 'df_type_Flying']
